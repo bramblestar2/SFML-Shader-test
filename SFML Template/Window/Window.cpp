@@ -1,8 +1,16 @@
 #include "Window.h"
+#include <time.h>
 
-Window::Window()
+Window::Window() : arr(sf::LinesStrip, 100)
 {
 	initWindow();
+	srand(time(NULL));
+
+	for (int i = 0; i < arr.getVertexCount(); i++)
+		arr[i] = sf::Vertex(sf::Vector2f(rand() % window->getSize().x, rand() % window->getSize().y));
+
+	shader.loadFromFile("shader.frag", sf::Shader::Fragment);
+	shader.setUniform("blur_radius", sf::Vector2f(0.01, 0.01));
 }
 
 Window::~Window()
@@ -24,6 +32,20 @@ void Window::run()
 void Window::render()
 {
 	window->clear();
+
+	sf::RenderTexture t;
+	t.create(window->getSize().x, window->getSize().y);
+
+	shader.setUniform("blur_radius", sf::Vector2f(sin(timeClock.getElapsedTime().asSeconds())/2, sin(timeClock.getElapsedTime().asSeconds())/2));
+
+	t.draw(arr);
+	sf::Texture a;
+	a.loadFromFile("R.png");
+	t.draw(sf::Sprite(a));
+	t.setSmooth(true);
+	
+	window->draw(sf::Sprite(t.getTexture()), &shader);
+	//window->draw(sf::Sprite(t.getTexture()));
 
 	window->display();
 }
@@ -60,5 +82,6 @@ void Window::updateSFMLEvents()
 
 void Window::initWindow()
 {
-	window = new sf::RenderWindow(sf::VideoMode(100, 100), "TITLE", sf::Style::Default);
+	window = new sf::RenderWindow(sf::VideoMode(400, 400), "TITLE", sf::Style::Default);
+	window->setFramerateLimit(60);
 }

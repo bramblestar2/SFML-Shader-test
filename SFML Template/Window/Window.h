@@ -16,10 +16,14 @@ public:
 private:
 	void initWindow();
 	
-	sf::Clock dtClock;
+	sf::Clock dtClock, timeClock;
 	double dt;
 
 	sf::RenderWindow* window;
 	sf::Event event;
+
+	sf::Shader shader;
+
+	sf::VertexArray arr;
 };
 
